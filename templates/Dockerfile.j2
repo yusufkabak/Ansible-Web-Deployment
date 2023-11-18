@@ -1,0 +1,4 @@
+FROM {{ base_image }}
+COPY {{ html_file }} /usr/share/nginx/html/
+EXPOSE {{ working_port }}
+CMD ["nginx", "-g", "daemon off;"]

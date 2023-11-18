@@ -1,0 +1,9 @@
+- name: Deploy Html Project
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Clone Project From Git Repo
+      git:
+        repo: https://github.com/yusufkabak/Ansible-Web-Deployment.git
+        dest: .
