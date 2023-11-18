@@ -27,6 +27,13 @@
         replica: "1"
         deployment_image: "sample-html-page:v1"
         working_port: "80"
+    - name: Template j2 k8s service.yml
+      template:
+        src: ./cloned/templates/service.j2
+        dest: ./buildDirectory/service.yml
+      vars:
+        deploy_name: "sample-html-page"
+        working_port: "80"        
     - name: Copy index html file from source to destination
       copy:
         src: ./cloned/index.html
