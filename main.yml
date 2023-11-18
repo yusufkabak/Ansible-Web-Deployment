@@ -1,9 +1,55 @@
 - name: Deploy Html Project
   hosts: localhost
   become: true
-
   tasks:
     - name: Clone Project From Git Repo
       git:
         repo: https://github.com/yusufkabak/Ansible-Web-Deployment.git
-        dest: .
+        dest: ./cloned/.
+    - name: Create buildDirectory if it doesn't exist
+      file:
+        path: ./buildDirectory
+        state: directory
+    - name: Template j2 dockerfile
+      template:
+        src: ./cloned/templates/Dockerfile.j2
+        dest: ./buildDirectory/Dockerfile
+      vars:
+        base_image: "nginx:latest"
+        html_file: "index.html"
+        working_port: "80"
+    - name: Template j2 k8s deployment.yml
+      template:
+        src: ./cloned/templates/deployment.j2
+        dest: ./buildDirectory/deployment.yml
+      vars:
+        deploy_name: "sample-html-page"
+        replica: "1"
+        deployment_image: "sample-html-page:v1"
+        working_port: "80"
+    - name: Copy index html file from source to destination
+      copy:
+        src: ./cloned/index.html
+        dest: ./buildDirectory/
+      become: yes
+    - name: Build Docker Image
+      docker_image:
+        name: sample-html-page
+        tag: v1
+        build:
+          pull: yes
+          path: ./buildDirectory
+    - name: Log in to Docker Registry
+      docker_login:
+        username: "{{ lookup('env', 'dockerhub_user') }}"
+        password: "{{ lookup('env', 'dockerhub_password') }}"
+    - name: Tag Docker Image
+      docker_image:
+        name: sample-html-page:v1
+        repository: yusufkabak/sample-html-page
+    - name: Push Docker Image to Registry
+      docker_image:
+        name: yusufkabak/sample-html-page
+        tag: v1
+        push: yes
+      become: yes

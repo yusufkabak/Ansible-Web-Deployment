@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ deploy_name }}
+spec:
+  replicas: {{ replica }}
+  selector:
+    matchLabels:
+      app: {{ deploy_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ deploy_name }}
+    spec:
+      containers:
+      - name: {{ deploy_name }}
+        image: {{ deployment_image }}
+        ports:
+        - containerPort: {{ working_port }}
+      imagePullSecrets:
+      - name: yusuf-dockerhub
